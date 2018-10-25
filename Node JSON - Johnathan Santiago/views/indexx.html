@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<title>My Tasks</title>
+<meta charset="UTF-8">
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
+
+
+<body>
+<!-- Header -->
+<header class="w3-container w3-theme w3-padding" id="myHeader">
+
+ <a class="w3-text-white w3-right w3-tooltip" href="/logout" title="Sair"><span title="Sair"><i class="fas fa-sign-out-alt"></i></span></a>
+  <div class="w3-center">
+
+
+  <h1 class="w3-xxxlarge w3-animate-bottom">MY TASKS</h1>
+    <div class="w3-padding-32">
+      <button class="w3-btn w3-xlarge w3-dark-grey w3-hover-light-grey" onclick="document.getElementById('id01').style.display='block'" style="font-weight:900;">New Task</button>
+    </div>
+  </div>
+</header>
+
+<!-- Modal -->
+<div id="id01" class="w3-modal">
+    <div class="w3-modal-content w3-card-4 w3-animate-top">
+      <header class="w3-container w3-theme-l1"> 
+        <span onclick="document.getElementById('id01').style.display='none'"
+        class="w3-button w3-display-topright"> X </span>
+        <h4>Create your task here</h4>
+      </header>
+	  <div class="w3-padding">
+		<div class="w3-row-padding">
+		<form id="myform" class="w3-container w3-card-4" action="/add" method="POST">
+		  <h2>Form</h2>
+		  
+		  <div class="w3-section"> 
+		  <label>Task</label>     
+		    <input id="txtTask" class="w3-input" type="text" required name="txtTask">  
+		  </div>
+
+		  <div class="w3-section">    
+		  <label>Assigned Person</label>  
+		    <input id="txtAssignment" class="w3-input" type="text" required name="txtAssignment">
+		  </div>
+
+		  <div class="w3-section">
+		  <label>DeadLine</label>      
+		    <input id="txtDeadline" class="w3-input" type="Date" required name="txtDeadline">
+		  </div>
+
+		  <div class="w3-section">     
+		     
+		  <button  type="submit" id="btnCreate" class="w3-btn w3-green w3-border w3-border-black w3-round-large" onclick="document.getElementById('id01').style.display='none'">Salvar</button>
+		  <button class="w3-btn w3-white w3-border w3-round-large" type="reset">Reset</button>
+		  </div>
+
+		</form>
+		</div>
+      </div>
+      <footer class="w3-container w3-theme-l1"></footer>
+    </div>
+</div>
+
+<!-- MY TABLE-->
+<div id="table-wrapper" class="w3-container" onload="List();">
+  <hr>
+  <div class="w3-center">
+    <h2>Tasks</h2>
+  </div>
+<div id="table-scroll" class="w3-responsive w3-card-4">
+<table id="tblList" class="w3-table-all"></table>
+</div>
+
+</div>
+
+<br>
+<!-- Footer -->
+<footer class="w3-container w3-theme-dark w3-padding-16">
+  <p>Aluno: <strong>Johnathan Santiago</strong></p>
+  <p>Professor: <strong>Jair Leite</strong></p>
+  <div style="position:relative;bottom:55px;" class="w3-tooltip w3-right">
+    <img src = "./imagens/imd-logo.png"   width="350" height="60"
+                 alt = "imd"  />
+    <a class="w3-text-white" href="#myHeader"><span class="w3-xlarge" title="GO TO TOP">
+    <i class="fa fa-chevron-circle-up"></i></span></a>
+
+  </div>
+
+</footer>
+
+<script type="text/javascript">
+  
+  //Montagem da tabela
+  $("#tblList").html("");
+    $("#tblList").html(
+            "<thead>" +
+            "<tr class='w3-theme'>" +                
+            "<th>Task</th>" +
+            "<th>Assigned Person</th>" +
+            "<th data-type='date' data-format-string='Do MMMM YYYY'>Deadline</th>" +
+            "<th>Ações</th>" +
+            "</tr>" +
+            "</thead>" +
+            "<tbody>" +
+            "</tbody>"
+            ); //Agregar a tabela a estructura HTML
+
+    $.getJSON("./task.json", function (data) {
+    $.each(data.tasks, function (index, value) {
+    
+        var t = value;
+        //convertendo string em date para formação na coluna
+        var date = new Date(t.deadline);
+        $("#tblList tbody").append("<tr>" +                    
+                "<td>" + t.task + "</td>" +
+                "<td>" + t.assignment + "</td>" +
+                "<td>" + date.getDate() + '/' + (date.getMonth() + 1) + '/' +  date.getFullYear() + "</td>" +                    
+                "<td>  <img src='./imagens/delete.png' alt='Delete" + index + "' class='btnDelete' onclick='Delete();'/></td>" +
+                "</tr>"
+                );
+      });
+    });
+    
+    //TODO Edit<img src='./imagens/edit.png' alt='Edit" + index + "' class='btnEdit' onclick='FillFields();' /> &nbsp &nbsp
+
+    function Delete() {
+    $('#tblList tr').each(function(indx, val) {
+      $(this).click(function() {
+        selected_index = $(this).index();
+        var result = confirm("Are you sure you want to delete the item "+ selected_index +" ?");
+        if (result) {
+
+          $.getJSON("./task.json", function (data) {
+            $.each(data.tasks, function (index, value) {
+            //Excluir o elemento selecionado da tabela
+            if(index == selected_index){
+              //var objectRemoved = data.tasks[index];
+            //  data.tasks.splice(index);
+              $.ajax({
+                url: '/delete',
+                method: 'GET',
+                data: 'id=' +selected_index
+              });
+              //here to save in json
+              alert("Task deleted successfully!"); //Mensagem de alerta
+            } 
+
+            location.reload();
+            });
+          });
+        }
+      })
+    })  
+  }
+
+
+
+function FillFields(){
+  $('#tblList tr').each(function(indx, val) {
+  $(this).click(function() {
+
+    operation = "E"; //"E" = Editar
+    document.getElementById('id01').style.display='block';
+        
+    selected_index = $(this).index();
+
+    //Obter o identificador do item a ser editado
+    $.getJSON("./task.json", function (data) {
+    var t = data.tasks[selected_index]; 
+
+    $("#txtTask").val(t.task);
+    $("#txtAssignment").val(t.assignment);
+    $("#txtDeadline").val(t.deadline);
+    $("#txtTask").focus();
+     });
+     })
+    })
+}
+
+</script>
+
+</body>
+</html>
